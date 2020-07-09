@@ -10,6 +10,14 @@ let sc = 15;
 let fr = 10;
 let fc = 35;
 
+// Dont allow user to manipulate Walls and stuff while animation is going on
+// Add Weighted Nodes
+// Add more algorithms like djikstra A* and stuff 
+// Change animation 
+// Wall building should not toggle the current status.. if the first node we clicked on built a wall then 
+// the following drag should always build a wall... if the first click erased a wall then the following drag 
+// should erase walls
+
 
 export default class Pathfinder extends Component{
     constructor(){
@@ -104,6 +112,8 @@ export default class Pathfinder extends Component{
         for(let i = 1; i< path.length-1; i++){  
             const node = path[i];  
             setTimeout(() => {
+                // Here we are directly manipulating the DOM which is apparently not the best thing
+                // learn about react RAF to change this and do it the react way
                 document.getElementById(`node-${node.row}-${node.col}`).className =
                 'node node-shortest-path';
             }, 10 * i);
@@ -114,7 +124,6 @@ export default class Pathfinder extends Component{
     animatevisited(order,path, start, finish){
         
         for(let i = 1; i< order.length; i++){ 
-            
             if(i === order.length-1){
                 setTimeout(() => {
                     this.animatepath(path);
@@ -123,6 +132,8 @@ export default class Pathfinder extends Component{
             }   
             const node = order[i];
             setTimeout(() => {
+                // Here we are directly manipulating the DOM which is apparently not the best thing
+                // learn about react RAF to change this and do it the react way
                 document.getElementById(`node-${node.row}-${node.col}`).className =
                 'node node-visited';
             },10 * i);

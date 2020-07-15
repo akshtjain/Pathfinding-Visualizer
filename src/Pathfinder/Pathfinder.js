@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
 import './Pathfinder.css'
-import update from 'react-addons-update';
+// import update from 'react-addons-update';
 import Node from './Node.js'
 import {bfs, getshortestpath} from './Algos/bfs';
-import {dfs, getpathdfs} from './Algos/dfs'
+import {dfs, getpathdfs} from './Algos/dfs';
+import {aStar, getpathaStar} from './Algos/aStar';
 
 let sr = 10;
 let sc = 15;
@@ -18,6 +19,9 @@ let fc = 35;
 // the following drag should always build a wall... if the first click erased a wall then the following drag 
 // should erase walls
 
+// Given multiple points find a point for which the sum of distances from all given points is smallest OR 
+// from where the maximum distance from between any starting point and destination point is minimum
+
 
 export default class Pathfinder extends Component{
     constructor(){
@@ -27,6 +31,7 @@ export default class Pathfinder extends Component{
             mouse : false,
             changeStart: false,
             changeFinish: false,
+            addWeight: false,
         };
         
         
@@ -62,11 +67,20 @@ export default class Pathfinder extends Component{
             });
             return;
         }
-        const newnode = {
-            ...node,
-            isWall: !node.isWall,
+        if(this.state.addWeight === true){
+            const newnode = {
+                ...node,
+                isWeighted: !node.isWeighted,
+            }
+            newgrid[r][c] = newnode;
+        }else{
+            const newnode = {
+                ...node,
+                isWall: !node.isWall,
+            }
+            newgrid[r][c] = newnode;
         }
-        newgrid[r][c] = newnode;
+        
         this.setState({grid: newgrid, mouse: true});
     }
     
@@ -89,11 +103,19 @@ export default class Pathfinder extends Component{
             fr = r;
             fc = c;
         }else{
-            const newnode = {
-                ...node,
-                isWall: !node.isWall,
+            if(this.state.addWeight === true){
+                const newnode = {
+                    ...node,
+                    isWeighted: !node.isWeighted,
+                }
+                newgrid[r][c] = newnode;
+            }else{
+                const newnode = {
+                    ...node,
+                    isWall: !node.isWall,
+                }
+                newgrid[r][c] = newnode;
             }
-            newgrid[r][c] = newnode;
         }
         
         this.setState({grid: newgrid});
@@ -104,6 +126,12 @@ export default class Pathfinder extends Component{
             changeFinish: false,
             changeStart: false,
             mouse : false
+        });
+    }
+
+    toggleW(){
+        this.setState({
+            addWeight : !(this.state.addWeight),
         });
     }
 
@@ -157,6 +185,14 @@ export default class Pathfinder extends Component{
         const path  = getpathdfs(grid,start, finish );
         this.animatevisited(order, path, start, finish);
     }
+    visualizeAStar(){
+        const grid = this.state.grid.slice();
+        const start = grid[sr][sc];
+        const finish = grid[fr][fc];
+        const order = aStar(grid, start , finish );
+        const path  = getpathaStar(grid,start, finish );
+        this.animatevisited(order, path, start, finish);
+    }
 
     resetGrid(){
         const grid = this.setgrid();
@@ -169,10 +205,12 @@ export default class Pathfinder extends Component{
         }
     }
 
+    
     render (){
         const grid = this.state.grid;
         return(
             <>
+            
             <button 
                 onClick = {() => this.visualizeBFS() }>
                 BFS
@@ -181,17 +219,27 @@ export default class Pathfinder extends Component{
                 onClick = {() => this.visualizeDFS() }>
                 DFS
             </button>
+            <button 
+                onClick = {() => this.visualizeAStar() }>
+                AStar
+            </button>
             <button
                 onClick = {() => this.resetGrid()}
             >
                 Reset
             </button>
+            <button
+                onClick = {() => this.toggleW() }
+            >
+                Weight/Wall
+            </button>
             <div className = "grid">
+            
                 {grid.map((row, rowind) =>{
                     return(
                         <div key = {rowind} >
                             {row.map((node, ind)=>{
-                                const {val, row, col, isStart, isFinish, isWall, isVisited, inPath} = node;
+                                const {val, row, col, isStart, isFinish, isWall, isVisited, inPath,isWeighted} = node;
                                 return(
                                     <Node
                                         key = {val}
@@ -202,6 +250,7 @@ export default class Pathfinder extends Component{
                                         isStart = {isStart}
                                         isWall = {isWall}
                                         isVisited = {isVisited}
+                                        isWeighted = {isWeighted}
                                         onMouseDown = {(r,c)=> this.handleMouseDown(r, c)}
                                         onMouseUp = {(r,c) => this.handleMouseUp(r, c)}
                                         onMouseEnter = {(r,c) => this.handleMouseEnter(r, c)}
@@ -229,5 +278,7 @@ const newnode = (row, col) =>{
         isVisited : false,
         prev: null,
         inPath: false,
+        isWeighted : false,
+        g : Infinity,
     };
 }

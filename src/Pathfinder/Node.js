@@ -18,16 +18,21 @@ export default class Node extends Component{
             isVisited,
             isWall,
             inPath,
+            isWeighted
         } = this.props;
 
-        const extraclass = isFinish
-        ? 'isFinish' : 
+        const extraclass = isFinish ?
+        'isFinish' : 
         isStart ? 
         'isStart' :
         isWall ?
         'isWall':
+        isWeighted ?
+        'isWeighted':
         '';
 
+        
+        
         return(
             <div
                 id = {`node-${row}-${col}`}
@@ -36,6 +41,7 @@ export default class Node extends Component{
                 onMouseUp = {() => onMouseUp(row, col)}
                 onMouseEnter = {() => onMouseEnter(row, col)}
             >
+            
             </div>
         );
     }

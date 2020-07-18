@@ -22,17 +22,14 @@
 .isWall{
     background-color: darkblue;
 }
-/* .isWeighted{
-    background-image: url(weight.png);
-    background-repeat: no-repeat;
-    width: 25px;
-    height: 25px;
-} */
+.isWeighted{
+    background-color: teal;
+}
 
-.image{
+/* .image{
   width: 25px;
   height : 25px;
-}
+} */
 
 .node-visited {
     animation-name: visitedAnimation;

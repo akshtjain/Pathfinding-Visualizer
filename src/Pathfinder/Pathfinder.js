@@ -5,6 +5,7 @@ import Node from './Node.js'
 import {bfs, getshortestpath} from './Algos/bfs';
 import {dfs, getpathdfs} from './Algos/dfs';
 import {aStar, getpathaStar} from './Algos/aStar';
+import {djikstra, getPathDijkstra, dijkstra} from './Algos/dijkstra';
 
 let sr = 10;
 let sc = 15;
@@ -193,6 +194,14 @@ export default class Pathfinder extends Component{
         const path  = getpathaStar(grid,start, finish );
         this.animatevisited(order, path, start, finish);
     }
+    visualizeDijkstra(){
+        const grid = this.state.grid.slice();
+        const start = grid[sr][sc];
+        const finish = grid[fr][fc];
+        const order = dijkstra(grid, start , finish );
+        const path  = getPathDijkstra(finish);
+        this.animatevisited(order, path, start, finish);
+    }
 
     resetGrid(){
         const grid = this.setgrid();
@@ -222,6 +231,10 @@ export default class Pathfinder extends Component{
             <button 
                 onClick = {() => this.visualizeAStar() }>
                 AStar
+            </button>
+            <button 
+                onClick = {() => this.visualizeDijkstra() }>
+                Dijkstra
             </button>
             <button
                 onClick = {() => this.resetGrid()}
@@ -280,5 +293,6 @@ const newnode = (row, col) =>{
         inPath: false,
         isWeighted : false,
         g : Infinity,
+        distance: Infinity,
     };
 }

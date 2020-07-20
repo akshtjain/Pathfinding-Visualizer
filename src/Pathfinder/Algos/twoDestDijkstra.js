@@ -1,5 +1,30 @@
-export function dijkstra(grid, startNode, finishNode) {
-    const visitedNodesInOrder = [];
+
+export function twoDestDijkstra(grid, start, f1, f2){
+    const grid_1 = grid.map(a => a.map(b => Object.assign({}, b)));
+    const grid_2 = grid.map(a => a.map(b => Object.assign({}, b)));
+    let a =  getdist(grid_1,grid_1[start.row][start.col], grid_1[f1.row][f1.col]);
+    let b = getdist(grid_2, grid_2[start.row][start.col], grid_2[f2.row][f2.col]);
+    console.log(a,b);
+    if(a < b){
+        return f1;
+    }else{
+        return f2;
+    }
+}
+
+function getdist(grid, startNode, finishNode){
+    dijkstra(grid, startNode, finishNode);
+    let currentNode = finishNode;
+    let count = 0;
+    if(currentNode.isVisited === false) return Infinity;
+    while (currentNode !== null) {
+      count++;
+      currentNode = currentNode.prev;
+    }
+    return count;
+}
+
+function dijkstra(grid, startNode, finishNode) {
     startNode.distance = 0;
     const unvisitedNodes = getAllNodes(grid);
     while (!!unvisitedNodes.length) {
@@ -9,10 +34,9 @@ export function dijkstra(grid, startNode, finishNode) {
       if (closestNode.isWall) continue;
       // If the closest node is at a distance of infinity,
       // we must be trapped and should therefore stop.
-      if (closestNode.distance === Infinity) return visitedNodesInOrder;
+      if (closestNode.distance === Infinity) return ;
       closestNode.isVisited = true;
-      visitedNodesInOrder.push(closestNode);
-      if (closestNode === finishNode) return visitedNodesInOrder;
+      if (closestNode === finishNode) return 
       updateUnvisitedNeighbors(closestNode, grid);
     }
   }
@@ -49,16 +73,4 @@ export function dijkstra(grid, startNode, finishNode) {
     return nodes;
   }
   
-  // Backtracks from the finishNode to find the shortest path.
-  // Only works when called *after* the dijkstra method above.
-  export function getPathDijkstra(grid, finishNode) {
-    const {row, col} = finishNode;
-    finishNode = grid[row][col];
-    const nodesInShortestPathOrder = [];
-    let currentNode = finishNode;
-    while (currentNode !== null) {
-      nodesInShortestPathOrder.push(currentNode);
-      currentNode = currentNode.prev;
-    }
-    return nodesInShortestPathOrder;
-  }
+ 

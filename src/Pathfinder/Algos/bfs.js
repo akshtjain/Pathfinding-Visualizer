@@ -45,15 +45,15 @@ function getneighbors(grid, curr){
 }
 
 
-export function getshortestpath(grid, start, finish){
+export function getshortestpath(grid,finish){
     const shortestpath = [];
     if(finish.isVisited){
         let curr = finish;
-        while(curr != start){
+        while(curr !== null){
             shortestpath.push(curr);
             curr = curr.prev;
         }
     }
-    if(shortestpath.length > 0) shortestpath.push(start);
+    
     return shortestpath;
 }

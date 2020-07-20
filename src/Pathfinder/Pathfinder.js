@@ -6,11 +6,15 @@ import {bfs, getshortestpath} from './Algos/bfs';
 import {dfs, getpathdfs} from './Algos/dfs';
 import {aStar, getpathaStar} from './Algos/aStar';
 import {djikstra, getPathDijkstra, dijkstra} from './Algos/dijkstra';
+import {twoDestDijkstra} from './Algos/twoDestDijkstra'
+import { getRoles } from '@testing-library/react';
 
 let sr = 10;
 let sc = 15;
 let fr = 10;
 let fc = 35;
+let fr2 = 5;
+let fc2 = 45;
 
 // Dont allow user to manipulate Walls and stuff while animation is going on
 // Add Weighted Nodes
@@ -145,27 +149,23 @@ export default class Pathfinder extends Component{
                 // learn about react RAF to change this and do it the react way
                 document.getElementById(`node-${node.row}-${node.col}`).className =
                 'node node-shortest-path';
-            }, 10 * i);
+            }, 30 * i);
         }
     }
 
 
-    animatevisited(order,path, start, finish){
+    animatevisited(order,path, additional = 0){
         
-        for(let i = 1; i< order.length; i++){ 
-            if(i === order.length-1){
-                setTimeout(() => {
-                    this.animatepath(path);
-                }, 10 * i);
-                return;
-            }   
+        for(let i = 1; i< order.length-1; i++){ 
+            
+               
             const node = order[i];
             setTimeout(() => {
                 // Here we are directly manipulating the DOM which is apparently not the best thing
                 // learn about react RAF to change this and do it the react way
                 document.getElementById(`node-${node.row}-${node.col}`).className =
                 'node node-visited';
-            },10 * i);
+            },10 * (i+additional));
         }
     }
 
@@ -175,7 +175,11 @@ export default class Pathfinder extends Component{
         const finish = grid[fr][fc];
         const order = bfs(grid, start , finish );
         const path  = getshortestpath(grid,start, finish );
-        this.animatevisited(order, path, start, finish);
+        this.animatevisited(order, path);
+        setTimeout(() =>{
+            this.animatepath(path);
+        }, 10*order.length );
+        
     }
     visualizeDFS(){
         const grid = this.state.grid.slice();
@@ -184,7 +188,10 @@ export default class Pathfinder extends Component{
         const temp = dfs(grid, start , finish );
         const order = temp.order;
         const path  = getpathdfs(grid,start, finish );
-        this.animatevisited(order, path, start, finish);
+        this.animatevisited(order, path);
+        setTimeout(() =>{
+            this.animatepath(path);
+        }, 10*order.length );
     }
     visualizeAStar(){
         const grid = this.state.grid.slice();
@@ -192,15 +199,55 @@ export default class Pathfinder extends Component{
         const finish = grid[fr][fc];
         const order = aStar(grid, start , finish );
         const path  = getpathaStar(grid,start, finish );
-        this.animatevisited(order, path, start, finish);
+        this.animatevisited(order, path);
+        setTimeout(() =>{
+            this.animatepath(path);
+        }, 10*order.length );
     }
     visualizeDijkstra(){
         const grid = this.state.grid.slice();
         const start = grid[sr][sc];
         const finish = grid[fr][fc];
         const order = dijkstra(grid, start , finish );
-        const path  = getPathDijkstra(finish);
-        this.animatevisited(order, path, start, finish);
+        const path  = getPathDijkstra(grid, finish);
+        this.animatevisited(order, path);
+        setTimeout(() =>{
+            this.animatepath(path);
+        }, 10*order.length );
+    }
+
+
+    visualizetwoDest(){
+        const grid = this.state.grid.slice();
+        const grid_1 = grid.map(a => a.map(b => Object.assign({}, b)));
+        const grid_2 = grid.map(a => a.map(b => Object.assign({}, b)));
+        const start = grid[sr][sc];
+        const f1 = grid[fr][fc];
+        const f2 = grid[fr2][fc2];
+        let order1 = [];
+        let order2 = [];
+        let path1;
+        let path2;
+        if(twoDestDijkstra(grid, grid[sr][sc], grid[fr][fc], grid[fr2][fc2]) === grid[fr][fc]){
+            order1 = dijkstra(grid_1, grid_1[sr][sc], grid_1[fr][fc]);
+            order2 = dijkstra(grid_2, grid_2[fr][fc], grid_2[fr2][fc2]);
+            path1 = getPathDijkstra(grid_1, grid_1[fr][fc]);
+            path2 = getPathDijkstra(grid_2, grid_2[fr2][fc2]);
+        }else{
+            console.log("jfhg");
+            order1 = dijkstra(grid_1, grid_1[sr][sc], grid_1[fr2][fc2]);
+            order2 = dijkstra(grid_2, grid_2[fr2][fc2], grid_2[fr][fc]);
+            path1 = getPathDijkstra(grid_1, grid_1[fr2][fc2]);
+            path2 = getPathDijkstra(grid_2, grid_2[fr][fc]);
+        }
+        this.animatevisited(order1, path1);
+        this.animatevisited(order2,path2, order1.length);
+        setTimeout(() =>{
+            this.animatepath(path1);
+        }, 10*(order1.length+order2.length) );
+        setTimeout(() =>{
+            this.animatepath(path2);
+        }, 10*(order1.length+order2.length) + 30*(path1.length) );
     }
 
     resetGrid(){
@@ -235,6 +282,10 @@ export default class Pathfinder extends Component{
             <button 
                 onClick = {() => this.visualizeDijkstra() }>
                 Dijkstra
+            </button>
+            <button 
+                onClick = {() => this.visualizetwoDest() }>
+                2Dest
             </button>
             <button
                 onClick = {() => this.resetGrid()}
@@ -286,7 +337,7 @@ const newnode = (row, col) =>{
         row,
         col, 
         isStart : (row === sr && col === sc)? true: false,
-        isFinish : (row === fr && col === fc)? true: false,
+        isFinish : ((row === fr && col === fc) || (row === fr2 && col === fc2))? true: false,
         isWall : false,
         isVisited : false,
         prev: null,

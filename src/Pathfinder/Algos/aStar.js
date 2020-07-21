@@ -61,18 +61,3 @@ export function aStar(grid, start, finish){
     }
     return order;
 }
-
-
-
-export function getpathaStar(grid, start, finish){
-    const path = [];
-    if(finish.isVisited){
-        let curr = finish;
-        while(curr !== null){
-            path.push(curr);
-            curr = curr.prev;
-        }
-    }
-    console.log(path);
-    return path;
-}

@@ -48,17 +48,3 @@ export function dijkstra(grid, startNode, finishNode) {
     }
     return nodes;
   }
-  
-  // Backtracks from the finishNode to find the shortest path.
-  // Only works when called *after* the dijkstra method above.
-  export function getPathDijkstra(grid, finishNode) {
-    const {row, col} = finishNode;
-    finishNode = grid[row][col];
-    const nodesInShortestPathOrder = [];
-    let currentNode = finishNode;
-    while (currentNode !== null) {
-      nodesInShortestPathOrder.push(currentNode);
-      currentNode = currentNode.prev;
-    }
-    return nodesInShortestPathOrder;
-  }

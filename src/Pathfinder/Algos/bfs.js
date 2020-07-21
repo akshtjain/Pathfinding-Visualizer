@@ -44,16 +44,3 @@ function getneighbors(grid, curr){
     return n;
 }
 
-
-export function getshortestpath(grid,finish){
-    const shortestpath = [];
-    if(finish.isVisited){
-        let curr = finish;
-        while(curr !== null){
-            shortestpath.push(curr);
-            curr = curr.prev;
-        }
-    }
-    
-    return shortestpath;
-}

@@ -9,7 +9,7 @@ function heuristic(a, b, c, d){
 }
 
 function isValid(grid, r, c){
-    if(r < 20 && r >= 0 && c < 50 && c >=0 ){
+    if(r < grid.length - 1 && r >= 0 && c < grid[0].length - 1 && c >=0 ){
         if(grid[r][c].isWall === false) return true;
     }
     return false;

@@ -21,7 +21,7 @@ export function dfs(grid, start, finish){
                 return order;  
         }
     }
-    if(c+1 < 50){
+    if(c+1 < grid[0].length - 1){
         if((!grid[r][c+1].isVisited) && (!grid[r][c+1].isWall)){
             grid[r][c+1].prev = start;
             const temp = dfs(grid, grid[r][c+1], finish);
@@ -39,7 +39,7 @@ export function dfs(grid, start, finish){
                 return order;    
         }
     }    
-    if(r+1 < 20){ 
+    if(r+1 < grid.length - 1){ 
         if((!grid[r+1][c].isVisited) && (!grid[r+1][c].isWall)){ 
             grid[r+1][c].prev = start;
             const temp = dfs(grid, grid[r+1][c], finish);

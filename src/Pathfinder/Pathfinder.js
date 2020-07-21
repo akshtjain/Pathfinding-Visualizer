@@ -10,12 +10,12 @@ import {twoDestDijkstra} from './Algos/twoDestDijkstra'
 import {getPath} from './Algos/getPath'
 import { getRoles } from '@testing-library/react';
 
-let sr = 10;
-let sc = 15;
-let fr = 10;
-let fc = 35;
-let fr2 = 5;
-let fc2 = 45;
+let sr = 13;
+let sc = 7;
+let fr = 13;
+let fc = 33;
+let fr2 = -1;
+let fc2 = -1;
 
 // Dont allow user to manipulate Walls and stuff while animation is going on
 // Add Weighted Nodes
@@ -43,19 +43,19 @@ export default class Pathfinder extends Component{
             isAnimationActive:false,
             whichAlgo: null,
             eraser: false,
+            secondFinish : false,
         };
         
         
     }
     setgrid(){
         const grid = [];
-        for(let i = 0; i <20; i++){
+        for(let i = 0; i <25; i++){
             const currrow = []
-            for(let j = 0; j< 50; j++){
+            for(let j = 0; j< 40; j++){
                 currrow.push(newnode(i,j));
             }
             grid.push(currrow);
-
         }
         return grid;
     }
@@ -88,6 +88,9 @@ export default class Pathfinder extends Component{
         }
         if(this.state.addWeight === true){
             this.setState({eraser : node.isWeighted});
+            if(node.isWall===true)
+                node.isWall=false
+            
             const newnode = {
                 ...node,
                 isWeighted: !node.isWeighted,
@@ -95,6 +98,8 @@ export default class Pathfinder extends Component{
             newgrid[r][c] = newnode;
         }else{
             this.setState({eraser : node.isWall});
+            if(node.isWeighted===true)
+                    node.isWeighted=false;
             const newnode = {
                 ...node,
                 isWall: !node.isWall,
@@ -135,12 +140,25 @@ export default class Pathfinder extends Component{
             fc = c;
         }else{
             if(this.state.addWeight === true){
-                const newnode = {
+                const newnode = { 
                     ...node,
-                    isWeighted: !this.state.eraser,
                 }
+                if(node.isWall===false)
+                    newnode.isWeighted = !this.state.eraser;
+                
+                // If you think Weight > Wall use the code given below and comment the above part out 
+
+                // if(node.isWall === true)
+                //     node.isWall = false;
+                // const newnode = {
+                //     ...node,
+                //     isWeighted: !this.state.eraser,
+                // }
+
                 newgrid[r][c] = newnode;
             }else{
+                if(node.isWeighted===true)
+                    node.isWeighted=false;
                 const newnode = {
                     ...node,
                     isWall: !this.state.eraser,
@@ -169,10 +187,26 @@ export default class Pathfinder extends Component{
         });
     }
 
+    toggleBomb(){
+        // const grid = this.state.grid.slice();
+        if(this.state.bomb){
+            fr2 = -1;
+            fc2 = -1;
+        }
+        else{
+            fr2 = 13;
+            fc2 = 20;
+        }
+        this.setState({
+            bomb : !this.state.bomb,
+            grid : this.setgrid(),
+        });
+    }
+
     removeWeights(){
         const grid = this.state.grid.slice();
-        for(let i = 0; i <20; i++){
-            for(let j = 0; j< 50; j++){
+        for(let i = 0; i <grid.length ; i++){
+            for(let j = 0; j< grid[0].length; j++){
                 grid[i][j] = {
                     ...grid[i][j],
                     isWeighted : false,
@@ -234,6 +268,11 @@ export default class Pathfinder extends Component{
         this.setState({
             isAnimationActive:true,
         })
+        this.resetPath();
+        if(this.state.bomb){
+            this.visualizetwoDest();
+            return;
+        }
         const grid = this.state.grid.map(a => a.map(b => Object.assign({}, b)));
         const start = grid[sr][sc];
         const finish = grid[fr][fc];
@@ -271,15 +310,44 @@ export default class Pathfinder extends Component{
         let order2 = [];
         let path1;
         let path2;
+        const algo = this.state.whichAlgo;
         if(twoDestDijkstra(grid, grid[sr][sc], grid[fr][fc], grid[fr2][fc2]) === grid[fr][fc]){
-            order1 = dijkstra(grid_1, grid_1[sr][sc], grid_1[fr][fc]);
-            order2 = dijkstra(grid_2, grid_2[fr][fc], grid_2[fr2][fc2]);
+            if(algo === 'bfs'){
+                order1 = bfs(grid_1, grid_1[sr][sc], grid_1[fr][fc]);
+                order2 = bfs(grid_2, grid_2[fr][fc], grid_2[fr2][fc2]);
+            }
+            else if(algo === 'dfs'){
+                order1 = dfs(grid_1, grid_1[sr][sc], grid_1[fr][fc]);
+                order2 = dfs(grid_2, grid_2[fr][fc], grid_2[fr2][fc2]);
+            }
+            else if(algo === 'dijkstra'){
+                order1 = dijkstra(grid_1, grid_1[sr][sc], grid_1[fr][fc]);
+                order2 = dijkstra(grid_2, grid_2[fr][fc], grid_2[fr2][fc2]);
+            }
+            else if(algo === 'aStar'){
+                order1 = aStar(grid_1, grid_1[sr][sc], grid_1[fr][fc]);
+                order2 = aStar(grid_2, grid_2[fr][fc], grid_2[fr2][fc2]);
+            }            
+            
             path1 = getPath(grid_1, grid_1[fr][fc]);
             path2 = getPath(grid_2, grid_2[fr2][fc2]);
         }else{
-            console.log("jfhg");
-            order1 = dijkstra(grid_1, grid_1[sr][sc], grid_1[fr2][fc2]);
-            order2 = dijkstra(grid_2, grid_2[fr2][fc2], grid_2[fr][fc]);
+            if(algo === 'bfs'){
+                order1 = bfs(grid_1, grid_1[sr][sc], grid_1[fr2][fc2]);
+                order2 = bfs(grid_2, grid_2[fr2][fc2], grid_2[fr][fc]);            
+            }
+            else if(algo === 'dfs'){
+                order1 = dfs(grid_1, grid_1[sr][sc], grid_1[fr2][fc2]);
+                order2 = dfs(grid_2, grid_2[fr2][fc2], grid_2[fr][fc]);            
+            }
+            else if(algo === 'dijkstra'){
+                order1 = dijkstra(grid_1, grid_1[sr][sc], grid_1[fr2][fc2]);
+                order2 = dijkstra(grid_2, grid_2[fr2][fc2], grid_2[fr][fc]);
+            }
+            else if(algo === 'aStar'){
+                order1 = aStar(grid_1, grid_1[sr][sc], grid_1[fr2][fc2]);
+                order2 = aStar(grid_2, grid_2[fr2][fc2], grid_2[fr][fc]);           
+            } 
             path1 = getPath(grid_1, grid_1[fr2][fc2]);
             path2 = getPath(grid_2, grid_2[fr][fc]);
         }
@@ -300,10 +368,9 @@ export default class Pathfinder extends Component{
             grid: grid, 
             pathLength : 0,
         }); 
-        for(let i = 0; i<20; i++){
-            for(let j = 0; j<50; j++){
-                document.getElementById(`node-${i}-${j}`).classList.remove('node-shortest-path');
-                document.getElementById(`node-${i}-${j}`).classList.remove('node-visited'); 
+        for(let i = 0; i<grid.length - 1; i++){
+            for(let j = 0; j<grid[0].length - 1; j++){
+                document.getElementById(`node-${i}-${j}`).classList.remove("node-shortest-path", "node-visited");
             }
         }
     }
@@ -311,97 +378,107 @@ export default class Pathfinder extends Component{
     resetPath()
     {
         if(this.state.isAnimationActive === true) return;
-        
+        const grid = this.state.grid.slice();
         this.setState({pathLength:0});
-        for (let i=0;i<20;i++)
-        {
-            for( let j=0;j<50;j++)
-            document.getElementById(`node-${i}-${j}`).classList.remove("node-shortest-path", "node-visited")
+        for(let i = 0; i<grid.length - 1; i++){
+            for(let j = 0; j<grid[0].length - 1; j++){
+                document.getElementById(`node-${i}-${j}`).classList.remove("node-shortest-path", "node-visited");
+            }
         }    
     }
 
 
     
     render (){
+        const visualizeButton = this.state.whichAlgo === null ? "Pick an Algorithm" : "Visualize";
+        const bombButton = this.state.secondFinish === false ? "Add Bomb" : "Remove Bomb";
+        const WButton = this.state.addWeight === false ? "Add Weights" : "Add Walls";
         const grid = this.state.grid;
         return(
-            <>
-            <button 
-                onClick = {() => this.setAlgo('bfs') }>
-                BFS
-            </button>
-            <button 
-                onClick = {() => this.setAlgo('dfs') }>
-                DFS
-            </button>
-            <button 
-                onClick = {() => this.setAlgo('aStar') }>
-                AStar
-            </button>
-            <button 
-                onClick = {() => this.setAlgo('dijkstra') }>
-                Dijkstra
-            </button>
-            <button 
-                onClick = {() => this.visualize() }>
-                visualize
-            </button>
-            <button 
-                onClick = {() => this.visualizetwoDest() }>
-                2Dest
-            </button>
-            <button
-                onClick = {() => this.resetGrid()}
-            >
-                Reset
-            </button>
-            <button
-                onClick = {() => this.toggleW() }
-            >
-                Weight/Wall
-            </button>
-            <button
-                onClick={()=>this.resetPath()}>
-                Reset Path
-            </button>
-            <button
-                onClick={()=>this.removeWeights()}>
-                removeWeights
-            </button>
-            
-            <div className="pathLength">
-                Path length: {this.state.pathLength}
-            </div>
-            <div className = "grid">
-            
-                {grid.map((row, rowind) =>{
-                    return(
-                        <div key = {rowind} >
-                            {row.map((node, ind)=>{
-                                const {val, row, col, isStart, isFinish, isWall, isVisited, inPath,isWeighted} = node;
-                                return(
-                                    <Node
-                                        key = {val}
-                                        num = {val}
-                                        row = {row}
-                                        col = {col}
-                                        isFinish = {isFinish}
-                                        isStart = {isStart}
-                                        isWall = {isWall}
-                                        isVisited = {isVisited}
-                                        isWeighted = {isWeighted}
-                                        onMouseDown = {(r,c)=> this.handleMouseDown(r, c)}
-                                        onMouseUp = {(r,c) => this.handleMouseUp(r, c)}
-                                        onMouseEnter = {(r,c) => this.handleMouseEnter(r, c)}
-                                    />
-                                );
-                                    
-                            })}
+            <div>
+                <div class="row ">
+                    <h1>Mars Curiosity Rover</h1>
+                </div>
+                <div className="row ">
+                    <div class="col span-1-of-4 nav-bar">
+                        <div className="Algorithms">
+                            <h2>Algorithms</h2>
+                            <div className="button BFS">
+                                onClick = {() => this.setAlgo('bfs') }>
+                                BFS
+                            </div>
+                            <div className="button DFS"
+                                onClick = {() => this.setAlgo('dfs') }>
+                                DFS
+                            </div>
+                            <div className="button AStar"
+                                onClick = {() => this.setAlgo('aStar') }>
+                                AStar
+                            </div>
+                            <div className="button Dijkstra"
+                                onClick = {() => this.setAlgo('dijkstra') }>
+                                Dijkstra
+                            </div>
+                            <div className="button Visualize"
+                                onClick = {() => this.visualize() }>
+                                {visualizeButton}
+                            </div>
                         </div>
-                    );
-                })}
+                        
+                        <div className="button Reset"
+                            onClick = {() => this.resetGrid()}>
+                            Reset
+                        </div>
+                        <div className="button weight-wall"
+                            onClick = {() => this.toggleW() }
+                        >
+                            {WButton}
+                        </div>
+                        <div className="button ResetPath"
+                            onClick={()=>this.resetPath()}>
+                            Reset Path
+                        </div>
+                        
+                        <div className="button AddBomb"
+                            onClick={()=>this.toggleBomb()}>
+                            {bombButton}
+                        </div>
+                        
+                        <div className="pathLength">
+                            Path length: {this.state.pathLength}
+                        </div>
+                    </div>
+                    <div className = "grid col span-3-of-4">
+                    
+                        {grid.map((row, rowind) =>{
+                            return(
+                                <div key = {rowind} >
+                                    {row.map((node, ind)=>{
+                                        const {val, row, col, isStart, isFinish, isWall, isVisited, inPath,isWeighted} = node;
+                                        return(
+                                            <Node
+                                                key = {val}
+                                                num = {val}
+                                                row = {row}
+                                                col = {col}
+                                                isFinish = {isFinish}
+                                                isStart = {isStart}
+                                                isWall = {isWall}
+                                                isVisited = {isVisited}
+                                                isWeighted = {isWeighted}
+                                                onMouseDown = {(r,c)=> this.handleMouseDown(r, c)}
+                                                onMouseUp = {(r,c) => this.handleMouseUp(r, c)}
+                                                onMouseEnter = {(r,c) => this.handleMouseEnter(r, c)}
+                                            />
+                                        );
+                                            
+                                    })}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
-            </>
         );
     }
 }

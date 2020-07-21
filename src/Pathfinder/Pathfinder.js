@@ -368,8 +368,8 @@ export default class Pathfinder extends Component{
             grid: grid, 
             pathLength : 0,
         }); 
-        for(let i = 0; i<grid.length - 1; i++){
-            for(let j = 0; j<grid[0].length - 1; j++){
+        for(let i = 0; i<grid.length ; i++){
+            for(let j = 0; j<grid[0].length ; j++){
                 document.getElementById(`node-${i}-${j}`).classList.remove("node-shortest-path", "node-visited");
             }
         }
@@ -380,8 +380,8 @@ export default class Pathfinder extends Component{
         if(this.state.isAnimationActive === true) return;
         const grid = this.state.grid.slice();
         this.setState({pathLength:0});
-        for(let i = 0; i<grid.length - 1; i++){
-            for(let j = 0; j<grid[0].length - 1; j++){
+        for(let i = 0; i<grid.length ; i++){
+            for(let j = 0; j<grid[0].length ; j++){
                 document.getElementById(`node-${i}-${j}`).classList.remove("node-shortest-path", "node-visited");
             }
         }    

@@ -258,7 +258,7 @@ export default class Pathfinder extends Component{
     }
     
     setAlgo(algo){
-        if(algo === 'bfs' || algo === 'dfs' || algo === 'aStar')
+        if(algo === 'bfs' || algo === 'dfs')
             this.removeWeights();
         this.setState({whichAlgo: algo});
     }
@@ -403,7 +403,7 @@ export default class Pathfinder extends Component{
                     <div class="col span-1-of-4 nav-bar">
                         <div className="Algorithms">
                             <h2>Algorithms</h2>
-                            <div className="button BFS">
+                            <div className="button BFS"
                                 onClick = {() => this.setAlgo('bfs') }>
                                 BFS
                             </div>

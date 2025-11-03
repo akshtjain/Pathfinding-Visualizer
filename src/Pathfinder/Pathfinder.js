@@ -390,92 +390,140 @@ export default class Pathfinder extends Component{
 
     
     render (){
-        const visualizeButton = this.state.whichAlgo === null ? "Pick an Algorithm" : "Visualize";
-        const bombButton = this.state.secondFinish === false ? "Add Bomb" : "Remove Bomb";
+        const visualizeButton = this.state.whichAlgo === null ? "Pick an Algorithm" : "Visualize " + this.state.whichAlgo.toUpperCase();
+        const bombButton = this.state.bomb === true ? "Remove Bomb" : "Add Bomb";
         const WButton = this.state.addWeight === false ? "Add Weights" : "Add Walls";
         const grid = this.state.grid;
         return(
-            <div>
-                <div class="row ">
-                    <h1>Mars Curiosity Rover</h1>
+            <div className="pathfinder-container">
+                <div className="header-section">
+                    <h1>🚀 Mars Curiosity Rover 🛰️</h1>
+                    <p>Pathfinding Algorithm Visualizer</p>
+                    <p style={{fontSize: '0.9em', opacity: 0.8}}>
+                        Explore different algorithms to find the optimal path on Mars terrain
+                    </p>
                 </div>
-                <div className="row ">
-                    <div class="col span-1-of-4 nav-bar">
-                        <div className="Algorithms">
-                            <h2>Algorithms</h2>
+
+                <div className="main-content">
+                    <div className="control-panel">
+                        <div className="algorithm-section">
+                            <h2 className="section-title">🎯 Algorithms</h2>
                             <div className="button BFS"
                                 onClick = {() => this.setAlgo('bfs') }>
-                                BFS
+                                Breadth First Search
                             </div>
                             <div className="button DFS"
                                 onClick = {() => this.setAlgo('dfs') }>
-                                DFS
+                                Depth First Search
                             </div>
                             <div className="button AStar"
                                 onClick = {() => this.setAlgo('aStar') }>
-                                AStar
+                                A* Algorithm
                             </div>
                             <div className="button Dijkstra"
                                 onClick = {() => this.setAlgo('dijkstra') }>
-                                Dijkstra
+                                Dijkstra's Algorithm
                             </div>
                             <div className="button Visualize"
                                 onClick = {() => this.visualize() }>
                                 {visualizeButton}
                             </div>
                         </div>
-                        
-                        <div className="button Reset"
-                            onClick = {() => this.resetGrid()}>
-                            Reset
+
+                        <div className="algorithm-section">
+                            <h2 className="section-title">🎮 Controls</h2>
+                            <div className="button weight-wall"
+                                onClick = {() => this.toggleW() }
+                            >
+                                {WButton}
+                            </div>
+                            <div className="button AddBomb"
+                                onClick={()=>this.toggleBomb()}>
+                                {bombButton}
+                            </div>
+                            <div className="button ResetPath"
+                                onClick={()=>this.resetPath()}>
+                                Reset Path
+                            </div>
+                            <div className="button Reset"
+                                onClick = {() => this.resetGrid()}>
+                                Reset Grid
+                            </div>
                         </div>
-                        <div className="button weight-wall"
-                            onClick = {() => this.toggleW() }
-                        >
-                            {WButton}
-                        </div>
-                        <div className="button ResetPath"
-                            onClick={()=>this.resetPath()}>
-                            Reset Path
-                        </div>
-                        
-                        <div className="button AddBomb"
-                            onClick={()=>this.toggleBomb()}>
-                            {bombButton}
-                        </div>
-                        
+
                         <div className="pathLength">
-                            Path length: {this.state.pathLength}
+                            📏 Path Length: {this.state.pathLength}
+                        </div>
+
+                        <div className="legend-section">
+                            <h3 className="section-title" style={{fontSize: '1em'}}>📖 Legend</h3>
+                            <div className="legend-item">
+                                <div className="legend-icon start"></div>
+                                <span>Start (Rover)</span>
+                            </div>
+                            <div className="legend-item">
+                                <div className="legend-icon finish"></div>
+                                <span>Finish (Target)</span>
+                            </div>
+                            <div className="legend-item">
+                                <div className="legend-icon wall"></div>
+                                <span>Wall (Obstacle)</span>
+                            </div>
+                            <div className="legend-item">
+                                <div className="legend-icon weighted"></div>
+                                <span>Weighted (Rough Terrain)</span>
+                            </div>
+                            <div className="legend-item">
+                                <div className="legend-icon visited"></div>
+                                <span>Visited Node</span>
+                            </div>
+                            <div className="legend-item">
+                                <div className="legend-icon path"></div>
+                                <span>Shortest Path</span>
+                            </div>
+                        </div>
+
+                        <div className="instructions">
+                            <h3>💡 How to Use:</h3>
+                            <ul>
+                                <li>Click & drag to create walls</li>
+                                <li>Drag start/finish nodes to reposition</li>
+                                <li>Add weights for rough terrain</li>
+                                <li>Select an algorithm to visualize</li>
+                                <li>Watch the algorithm find the path!</li>
+                            </ul>
                         </div>
                     </div>
-                    <div className = "grid col span-3-of-4">
-                    
-                        {grid.map((row, rowind) =>{
-                            return(
-                                <div key = {rowind} >
-                                    {row.map((node, ind)=>{
-                                        const {val, row, col, isStart, isFinish, isWall, isVisited, inPath,isWeighted} = node;
-                                        return(
-                                            <Node
-                                                key = {val}
-                                                num = {val}
-                                                row = {row}
-                                                col = {col}
-                                                isFinish = {isFinish}
-                                                isStart = {isStart}
-                                                isWall = {isWall}
-                                                isVisited = {isVisited}
-                                                isWeighted = {isWeighted}
-                                                onMouseDown = {(r,c)=> this.handleMouseDown(r, c)}
-                                                onMouseUp = {(r,c) => this.handleMouseUp(r, c)}
-                                                onMouseEnter = {(r,c) => this.handleMouseEnter(r, c)}
-                                            />
-                                        );
-                                            
-                                    })}
-                                </div>
-                            );
-                        })}
+
+                    <div className="grid-container">
+                        <div className="grid">
+                            {grid.map((row, rowind) =>{
+                                return(
+                                    <div key = {rowind} >
+                                        {row.map((node, ind)=>{
+                                            const {val, row, col, isStart, isFinish, isWall, isVisited, inPath,isWeighted} = node;
+                                            return(
+                                                <Node
+                                                    key = {val}
+                                                    num = {val}
+                                                    row = {row}
+                                                    col = {col}
+                                                    isFinish = {isFinish}
+                                                    isStart = {isStart}
+                                                    isWall = {isWall}
+                                                    isVisited = {isVisited}
+                                                    isWeighted = {isWeighted}
+                                                    onMouseDown = {(r,c)=> this.handleMouseDown(r, c)}
+                                                    onMouseUp = {(r,c) => this.handleMouseUp(r, c)}
+                                                    onMouseEnter = {(r,c) => this.handleMouseEnter(r, c)}
+                                                />
+                                            );
+                                                
+                                        })}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
